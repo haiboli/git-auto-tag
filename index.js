@@ -23,7 +23,7 @@ if (!shell.which('git')) {
 }
 let time = moment()
   .format('YYYYMMDDHHmmss')
-let remote = shell.exec(`git remote -v | grep git@code.vipkid.com.cn:3590/vfe/ | grep fetch`)
+let remote = shell.exec(`git remote -v | grep 3590/vfe/ | grep fetch`)
 if (remote) {
   remote = remote.split(/\s/)[0]
   // 生成带有分支名称的tag
