@@ -1,4 +1,4 @@
-# gitBranchBatch
+# gitAutoTag
 ## 开始
     npm install git-auto-tag -g
 
