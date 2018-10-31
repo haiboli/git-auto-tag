@@ -64,7 +64,7 @@ if (remote) {
   }
 
   else {
-    shell.exec(`git tag ${time}`)
+    shell.exec(`git tag t${time}`)
     console.log(chalk.blue(`生成tag: t${time}`))
     shell.exec(`git push ${remote} ${time}`)
   }
