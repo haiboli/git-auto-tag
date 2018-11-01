@@ -1,4 +1,6 @@
 # gitAutoTag
+## 目的
+  自动生成tag，push到仓库
 ## 开始
     npm install git-auto-tag -g
 
