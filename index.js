@@ -7,8 +7,7 @@ let program = require('commander'),
   moment = require('moment'),
   fs = require("fs"),
   ini = require('ini'),
-  path = require('path'),
-  echo = require('node-echo');
+  path = require('path');
 
 let TAGRC = path.join(process.env.HOME, '.tagrc');
 let PKG = require('./package.json');
