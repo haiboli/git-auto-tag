@@ -17,7 +17,7 @@
   "bin": {
     "gatag": "index.js"
   },
-  "keywords": [],
+  "keywords": ["自动", "push tag", "auto tag", "time tag"],
   "author": "lihaibo@gmail.com",
   "license": "ISC",
   "dependencies": {
