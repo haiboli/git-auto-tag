@@ -1,33 +1,90 @@
 #!/usr/bin/env node
 
 let args = process.argv
-let cmd = require('commander'),
+let program = require('commander'),
   chalk = require('chalk'),
-  shell = require('shelljs')
-moment = require('moment');
+  shell = require('shelljs'),
+  moment = require('moment'),
+  fs = require("fs"),
+  ini = require('ini'),
+  path = require('path'),
+  echo = require('node-echo');
+
+let TAGRC = path.join(process.env.HOME, '.tagrc');
+let PKG = require('./package.json');
+
+program
+  .version(PKG.version)
+
 /**
  * git 批量删除
  */
-cmd
-  .version('0.1.0')
+program
   .option('-w, --who', 'for tag with name')
   .option('-b, --branch', 'for tag with branch')
-  // .option('-a, --all', 'for tag with name and branch')
+  .option('-t, --time', 'format for time')
   .description('自动打tag')
+
+/**
+ * 设置push仓库
+ */
+program
+  .command('remote <remote_name>')
+  .alias('r')
+  .description('set remote name, Default: origin')
+  .action((remote_name) => {
+    let config = getCustomInI()
+    cmdValue = 'remote'
+    config['remote'] = {}
+    config['remote'].name = remote_name
+    setCustomInI(config)
+  })
+
+/**
+ * 设置tag格式
+ */
+program
+  .command('time <format>')
+  .alias('t')
+  .description('set time format, Default: YYYYMMDDHHmmss')
+  .action((format) => {
+    let config = getCustomInI()
+    cmdValue = 'time'
+    config['time'] = {}
+    config['time'].name = format
+    setCustomInI(config)
+  })
+
+program
   .parse(args)
 
-// 判断git命令是否可用
-if (!shell.which('git')) {
-  shell.echo('Sorry, this script requires git')
-  shell.exit(1)
+if (typeof cmdValue === 'undefined') {
+  addTag()
 }
-let time = moment()
-  .format('YYYYMMDDHHmmss')
-let remote = shell.exec(`git remote -v | grep 3590/vfe/ | grep fetch`)
-if (remote) {
-  remote = remote.split(/\s/)[0]
+
+
+/*//////////////// helper methods /////////////////*/
+
+function addTag() {
+  // 判断git命令是否可用
+  if (!shell.which('git')) {
+    shell.echo('Sorry, this script requires git')
+    shell.exit(1)
+  }
+  let config = getCustomInI();
+  let remote = 'origin';
+  let format = 'YYYYMMDDHHmmss'
+  if(config && config.remote && config.remote.name) {
+    remote = config.remote.name
+  }
+  if(config && config.time && config.time.name) {
+    format = config.time.name
+  }
+  let time = moment()
+    .format(format);
+
   // 生成带有分支名称的tag
-  if (cmd.branch) {
+  if (program.branch) {
     let branch = shell.exec(`git branch | grep "*"`)
     console.log(chalk.blue('-------------------'))
     if (branch) {
@@ -40,7 +97,7 @@ if (remote) {
   }
 
   // 生成带有用户名称的tag
-  else if (cmd.who) {
+  else if (program.who) {
     let name = shell.exec(`git config user.name`)
     console.log(chalk.blue('-------------------'))
     if (name) {
@@ -48,24 +105,17 @@ if (remote) {
       console.log(chalk.blue(`生成tag: t${time}-${name}`))
       shell.exec(`git push ${remote} t${time}-${name}`)
     }
-  }
-
-  // 生成带有分支名称和用户名的tag
-  else if (cmd.all) {
-    let name = shell.exec(`git config user.name`)
-    let branch = shell.exec(`git branch | grep "*"`)
-    console.log(chalk.blue('-------------------'))
-    if (name && branch) {
-      let branch_name = branch.split('* ')[1].split('\\n')[0]
-      let str = `t${time}-${branch_name}-${name}`
-      shell.exec(`git tag t${time}-${branch_name}-${name}`)
-      console.log(chalk.blue(`生成tag: t${time}-${branch_name}-${name}`))
-    }
-  }
-
-  else {
+  } else {
     shell.exec(`git tag t${time}`)
     console.log(chalk.blue(`生成tag: t${time}`))
-    shell.exec(`git push ${remote} ${time}`)
+    let res = shell.exec(`git push ${remote} t${time}`)
   }
+}
+
+function getCustomInI() {
+  return fs.existsSync(TAGRC) ? ini.parse(fs.readFileSync(TAGRC, 'utf-8')) : {}
+}
+
+function setCustomInI(config, cb) {
+  let res = shell.ShellString(ini.stringify(config)).to(TAGRC)
 }
