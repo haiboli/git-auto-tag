@@ -84,12 +84,12 @@ function addTag() {
 
   // 生成带有分支名称的tag
   if (program.branch) {
-    let branch = shell.exec(`git branch | grep "*"`)
+    let branch = shell.exec(`git branch | grep "*"`, {silent:true})
     console.log(chalk.blue('-------------------'))
     if (branch) {
       let branch_name = branch.split('* ')[1].split('\\n')[0]
       let tag = `t${time}-${branch_name}`
-      shell.exec(`git tag ${tag}`)
+      shell.exec(`git tag ${tag}`, {silent:true})
       console.log(chalk.blue(`生成tag: ${tag}`))
       shell.exec(`git push ${remote} ${tag}`)
     }
@@ -97,15 +97,15 @@ function addTag() {
 
   // 生成带有用户名称的tag
   else if (program.who) {
-    let name = shell.exec(`git config user.name`)
+    let name = shell.exec(`git config user.name`, {silent:true})
     console.log(chalk.blue('-------------------'))
     if (name) {
-      shell.exec(`git tag t${time}-${name}`)
+      shell.exec(`git tag t${time}-${name}`, {silent:true})
       console.log(chalk.blue(`生成tag: t${time}-${name}`))
       shell.exec(`git push ${remote} t${time}-${name}`)
     }
   } else {
-    shell.exec(`git tag t${time}`)
+    shell.exec(`git tag t${time}`, {silent:true})
     console.log(chalk.blue(`生成tag: t${time}`))
     let res = shell.exec(`git push ${remote} t${time}`)
   }
